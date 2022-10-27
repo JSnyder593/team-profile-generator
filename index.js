@@ -1,106 +1,131 @@
-//import library
+//imported packages
 const inquirer = require('inquirer');
+const fs = require("fs");
+
+//team class constructors
 const Employee = require('./Develop/lib/Employee');
 const Engineer = require('./Develop/lib/Engineer');
 const Intern = require('./Develop/lib/Intern');
 const Manager = require('./Develop/lib/Manager');
 
-const employees = [];
-const engineers = [];
-const interns = [];
-const managers = [];
+//generates the html page with cards
+const generateHtml = require('./Develop/util/generateHtml');
 
-//prompts for users to input info all roles have in common
-function getMember(){
+const team = [];
+
+//gets managers info and then prompts for engineer and intern roles
+init = () => {
     inquirer.prompt([
         {
             name: "name",
-            message: "What is your name?",
-            type: "input"
+            message: "What is your Manager's name?",
+            type: "text"
         },
         {
             name: "id",
-            message: "What is your ID#?",
-            type: "input"
+            message: "What is their Empployee ID #?",
+            type: "text"
         },
         {
             name: "email",
-            message: "What is your email?",
-            type: "input"
+            message: "What is their email address?",
+            type: "text"
         },
+        {
+            name: "officeNumber",
+            message: "What is their Office #?",
+            type: "text"
+        }
     ]).then((data) => {
-        const emp = new Employee(data.name, data.id, data.email);
-        employees.push(emp);
-        console.log(employees)
-        getRole();
+        const manager = new Manager(data.name, data.id, data.email, data.office);
+        team.push(manager);
+        console.log(manager);
+        addRole();
     })
+}; 
+
+//allows user to pick role, input info based on the roles class, adds it to the team array and prompts the user to either add another role or to finish team and create the html
+addRole = () => {
+    inquirer.prompt([
+        {
+            name: "Role",
+            type: "list",
+            choices: ["Engineer", "Intern", "quit"]
+        }
+    ]).then((answers) => {
+        switch (answers.Role) {
+            case "Engineer":
+                inquirer.prompt([
+                    {
+                        name: "name",
+                        message: "What is their name?",
+                        type: "text"
+                    },
+                    {
+                        name: "id",
+                        message: "What is their ID #?",
+                        type: "text"
+                    },
+                    {
+                        name: "email",
+                        message: "What is your their address?",
+                        type: "text"
+                    },
+                    {
+                        name: "user",
+                        message: "What is their Github username?"
+                    }
+                ]).then((data) => {
+                    const engineer = new Engineer(data.name, data.id, data.email, data.user);
+                    team.push(engineer)
+                    addRole();
+                })
+                break;
+
+            case "Intern":
+                inquirer.prompt([
+                    {
+                        name: "name",
+                        message: "What is their name?",
+                        type: "text"
+                    },
+                    {
+                        name: "id",
+                        message: "What is their ID #?",
+                        type: "text"
+                    },
+                    {
+                        name: "email",
+                        message: "What is their email address?",
+                        type: "text"
+                    },
+                    {
+                        name: "school",
+                        message: "Where do they attend University?",
+                        type: "text"
+                    }
+                ]).then((data) => {
+                    const intern = new Intern(data.name, data.id, data.email, data.school);
+                    team.push(intern)
+                    console.log("Would you like to add an Engineer an Intern or quit?")
+                    addRole();
+                });
+                    break;
+
+                case "quit":
+                    quit();
+
+            };
+    });
 };
 
-//function to pick role
-function getRole() {
-    inquirer.prompt({
-        name: "Role",
-        type: "list",
-        choices: ["Manager", "Engineer", "Intern"]
-    }).then((answers) => {
-        switch (answers.Role){
-            case "Manager":
-                console.log("Input Office#")
-                getOffice();
-                break;
-
-            case "Engineer":
-                console.log("Please input GitHub Username")
-                getGithub();
-                break;
-            
-            case "Intern":
-                console.log("Where do you attend school?")
-                getSchool();
-                break;           
+quit = () => { 
+    fs.writeFile("index.html", generateHtml(team), (err) => {
+        if(err){
+            throw err;
         }
     });
 };
 
-//functions that ask for more information based on the person's role
-function getOffice() {
-    inquirer.prompt({
-        name: "officenumber",
-        message: "What is your Office#?",
-        type: "input"
-    }).then((data) => {
-        const man = new Manager(data.officenumber);
-        managers.push(man);
-        console.log(managers);
-    });
-};
-
-function getGithub() {
-    inquirer.prompt({
-        name: "github",
-        message: "What is your Github Username?",
-        type: "input"
-    }).then((data) => {
-        const eng = new Engineer(data.github);
-        engineers.push(eng);
-        console.log(engineers);
-    });
-};
-
-function getSchool() {
-    inquirer.prompt({
-        name: "school",
-        message: "Where do you attend school?",
-        type: "input"
-    }).then((data) => {
-        const int = new Intern(data.school);
-        interns.push(int);
-        console.log(interns);
-    });
-};
-
-//take answers and have them link to generateHTML.js so they render on the webpage
-
 //initiating function
-getMember();
-
+init();
