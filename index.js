@@ -131,7 +131,7 @@ addIntern = () => {
 //generates html
 writeFile = () => {
     fs.writeFile("index.html", generateHtml(team), (err) =>
-        err ? console.log(err) : console.log("Generating Team Member Profiles"))
+        err ? console.log(err):console.log("Generating Team Member Profiles!"))
 }
 
 //initializes with first function
